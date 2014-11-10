@@ -15,7 +15,7 @@ config_ref = {
 		'DB':'../MTB_database_merged.db'
 	},	
 }
-config_MTB = {	
+config_MTB = {
 	'project_name': 'MTB',
 	'genotypes': {
 		'file': 'genotypes.csv',
@@ -711,7 +711,6 @@ config_Zeller = {
 		},
 		]
 	}	
-
 }
 
 # A Snp document contains the snp_id, the location (chromosome and position), both possible alleles. It also contains a field genotype which is a dictionnary.
@@ -724,6 +723,11 @@ class Snp(Document):
 	allele1 = StringField()
 	allele2 = StringField()
 	genotype = ListField(DictField(AnythingField()))
+
+	#Create indexes
+	index_snp_id = Index().ascending('snp_id')
+	index_snp_chr = Index().ascending('snp_chr').ascending('snp_position')
+
 
 # A gene contains the ensembl_gene_id and the external_id as well. It also contains the location of that gene (chromosome, position1 and position2) all exons 
 # of a given gene are listed as a dictionnary where an exon is defined by its exon_id and its location. The field expression contains for each condition in each project
@@ -738,6 +742,15 @@ class Gene(Document):
 	exons = AnythingField(db_field="exons")
 	expression = ListField(DictField(AnythingField()))
 
+	#Create indexes 
+	index_ensembl_gene_id = Index().ascending('ensembl_gene_id')
+	index_external_gene_id = Index().ascending('external_gene_id')
+	index_chr_pos1_pos2 = Index().ascending('gene_chr').ascending('position1').ascending('position2')
+	index_gene_chr = Index().ascending('gene_chr')
+	index_position1 = Index().ascending('position1')
+	index_position2 = Index().ascending('position2')
+
+
 # An association is defined by the snp_id and the ensembl_gene_id + external_gene_id. The field association contains, for each condition in each projet
 # the slope of the reqtl and the pvalue of the association in the form of a dictionnary
 class Association(Document):
@@ -746,6 +759,11 @@ class Association(Document):
 	ensembl_gene_id = StringField()
 	external_gene_id = StringField()
 	association = ListField(DictField(AnythingField()))
+
+	#Create indexes
+	index_snp_id = Index().ascending('snp_id')
+	index_ensembl_gene_id = Index().ascending('ensembl_gene_id')
+	index_snp_n_ensembl = Index().ascending('snp_id').ascending('ensembl_gene_id')
 
 
 # This method allows to fill the mongodb with referenced snps. The field genotype is left empty as this step is just to build the reference. The file read 
@@ -761,9 +779,9 @@ def fill_snps(config):
 			chrom = line[0] 
 			pos = line[1]
 			snp_id = line[2]
-			ref = line[3]
-			alt = line[4]
-			session.save(Snp(snp_id=snp_id, snp_chr=chrom, reference_allele=ref, alternative_allele = alt, genotype = [], snp_position=int(pos)))
+			al1 = line[3]
+			al2 = line[4]
+			session.save(Snp(snp_id=snp_id, snp_chr=chrom, allele1=al1, allele2 = al2, genotype = [], snp_position=int(pos)))
 		headers = False
 	print 'All Snps Added'
 
@@ -895,6 +913,8 @@ def add_associations(config):
 				first = False
 	#Feedback during execution 
 	print 'Done'
+
+def createIndexes():
 
 
 
