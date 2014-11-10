@@ -777,10 +777,12 @@ def add_genotypes(config):
 	print 'Done'
 
 
-# 
-# 
+# This method fills the expressions collection with the expression for each gene referenced in the latter collection. For each genes, 
+# the method loops on all individuals and a dictionnary containing the condition for the given project in the form of a dictionnary. 
 def add_expressions(config):
 	session = Session.connect('browser')
+	
+	# Feedback during execution
 	print 'Starting to Add expressions for each individuals per Gene Tested'
 	for f in config['expressions']['file']:
 		expressions = open(f['name'],'r')
@@ -795,10 +797,13 @@ def add_expressions(config):
 			print expression
 			query.append('expression', expression).execute()
 		expressions.close()
+	
+	# Feedback during execution 
 	print 'Done'
 
-#
-#
+# This method builds the reference for all genes. A coordinate file needs to be specified into the config_ref and all genes in this file 
+# Are loaded in the expressions collection. To add all exons for a given gene, we need to query the sqlite3 database which contains all exons 
+# linked with a corresponding ensembl_gene_id
 def fill_genes(config):
 
 	session = Session.connect('browser')			
@@ -810,6 +815,8 @@ def fill_genes(config):
 	conn = sqlite3.connect(DB)
 	conn.row_factory = sqlite3.Row
 	db = conn.cursor()	
+	
+	# Feedback during execution 
 	print 'Starting to add Genes from Reference to MongoDB browser'
 	for lines in f:
 		if not headers:
@@ -829,13 +836,16 @@ def fill_genes(config):
 	conn.commit()
 	conn.close()
 	
+	# Feedback during execution 
 	print 'All Genes Added'
 
-#
-#
+# This method goes through a dumped file from the sqlite3 db and adds every couple of snp/gene to the collection. If such association is absent from the collection 
+# the association is added and the field association is appended with the specific values for this project/condition else, the values are simply appended to the 
+# existing association with information about the specific project. 
 def add_associations(config):
 	session = Session.connect('browser')				
 	
+	# Feedback during execution 	
 	print 'Starting to add Associations'
 	
 	for it in config['associations']['file']:
@@ -854,6 +864,7 @@ def add_associations(config):
 			pval = line[6]
 			asso_type = line[7]
 			asso =[]
+			asso.append(['project_name',config['project_name']])
 			asso.append(['condition',con])
 			asso.append(['estimate',estimate])
 			asso.append(['pvalue',pval])
@@ -864,9 +875,10 @@ def add_associations(config):
 				if len(associations.all())==0:
 					session.save(Association(snp_id=snp_id,ensembl_gene_id=ensembl, external_gene_id=hugo, association = [dict(asso)]))
 				else:
-					associations.append('association',dict(ass)).execute()
+					associations.append('association',dict(asso)).execute()
 			else:
 				first = False
+	#Feedback during execution 
 	print 'Done'
 
 
