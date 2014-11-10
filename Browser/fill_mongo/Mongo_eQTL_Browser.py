@@ -698,6 +698,21 @@ config_MTB = {
 		]
 	}	
 }
+config_Zeller = {
+	
+	'project_name':'Zeller',
+	'genotypes':{},
+	'expressions':{},
+	'associations': {
+		'file' : [
+		{	
+			'condition' : 'All',
+			'file' : 'association.zeller.csv'
+		},
+		]
+	}	
+
+}
 
 # A Snp document contains the snp_id, the location (chromosome and position), both possible alleles. It also contains a field genotype which is a dictionnary.
 # For each project, and among each project, each condition, all genotypes are listed for the set of individuals with their labels. 
