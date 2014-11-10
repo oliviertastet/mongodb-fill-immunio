@@ -864,7 +864,7 @@ def add_associations(config):
 				if len(associations.all())==0:
 					session.save(Association(snp_id=snp_id,ensembl_gene_id=ensembl, external_gene_id=hugo, association = [dict(asso)]))
 				else:
-					associations.append('association',dict(ass)).execute()
+					associations.append('association',dict(asso)).execute()
 			else:
 				first = False
 	print 'Done'
